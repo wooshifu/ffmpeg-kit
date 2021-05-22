@@ -313,8 +313,8 @@ if [[ -n ${FFMPEG_KIT_LTS_BUILD} ]] && [[ ${API} -lt 18 ]]; then
   export LDFLAGS+=" -Wl,--whole-archive ${BASEDIR}/android/ffmpeg-kit-android-lib/src/main/cpp/libandroidltssupport.a -Wl,--no-whole-archive"
 fi
 
-# ALWAYS BUILD SHARED LIBRARIES
-BUILD_LIBRARY_OPTIONS="--disable-static --enable-shared"
+# ALWAYS BUILD STATIC AND SHARED LIBRARIES
+BUILD_LIBRARY_OPTIONS="--enable-static --enable-shared"
 
 # OPTIMIZE FOR SPEED INSTEAD OF SIZE
 if [[ -z ${FFMPEG_KIT_OPTIMIZED_FOR_SPEED} ]]; then
@@ -415,6 +415,7 @@ ${SED_INLINE} "s/\$version/$FFMPEG_VERSION/g" "${BASEDIR}"/src/"${LIB_NAME}"/ffb
   --disable-nvenc \
   --disable-vaapi \
   --disable-vdpau \
+  ${CUSTOM_FFMPEG_BUILD_OPTIONS} \
   ${CONFIGURE_POSTFIX} 1>>"${BASEDIR}"/build.log 2>&1
 
 if [[ $? -ne 0 ]]; then
