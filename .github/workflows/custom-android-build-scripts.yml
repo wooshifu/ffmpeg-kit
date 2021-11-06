@@ -1,4 +1,4 @@
-name: android build scripts
+name: custom android build scripts
 
 on: [ push, pull_request ]
 
@@ -25,7 +25,7 @@ jobs:
           unzip -q -o ndk.zip -d .ndk
           echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
       - name: run the build script
-        run: ./android.sh -d --api-level=21 --enable-android-media-codec --enable-android-zlib --no-archive --disable-arm-v7a --disable-x86
+        run: ./android.sh --api-level=21 --enable-android-media-codec --enable-android-zlib --no-archive --disable-arm-v7a --disable-x86
       - name: print build logs
         if: ${{ always() }}
         run: cat build.log
@@ -60,7 +60,7 @@ jobs:
           unzip -q -o ndk.zip -d .ndk
           echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
       - name: run the build script
-        run: ./android.sh -d --lts --api-level=21 --enable-android-media-codec --enable-android-zlib --no-archive --disable-arm-v7a --disable-x86
+        run: ./android.sh --lts --api-level=21 --enable-android-media-codec --enable-android-zlib --no-archive --disable-arm-v7a --disable-x86
       - name: print build logs
         if: ${{ always() }}
         run: cat build.log
