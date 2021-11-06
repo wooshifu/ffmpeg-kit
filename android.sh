@@ -252,90 +252,90 @@ if [[ ! -z ${FFMPEG_KIT_LTS_BUILD} ]]; then
 fi
 
 # BUILD FFMPEG-KIT
-if [[ -n ${ANDROID_ARCHITECTURES} ]]; then
-
-  echo -n -e "\nffmpeg-kit: "
-
-  # CREATE Application.mk FILE BEFORE STARTING THE NATIVE BUILD
-  build_application_mk
-
-  # CLEAR OLD NATIVE LIBRARIES
-  rm -rf "${BASEDIR}"/android/libs 1>>"${BASEDIR}"/build.log 2>&1
-  rm -rf "${BASEDIR}"/android/obj 1>>"${BASEDIR}"/build.log 2>&1
-
-  cd "${BASEDIR}"/android 1>>"${BASEDIR}"/build.log 2>&1 || exit 1
-
-  # COPY LICENSES
-  LICENSE_BASEDIR="${BASEDIR}"/android/ffmpeg-kit-android-lib/src/main/res/raw
-  rm -f "${LICENSE_BASEDIR}"/*.txt 1>>"${BASEDIR}"/build.log 2>&1 || exit 1
-  for library in {0..46}; do
-    if [[ ${ENABLED_LIBRARIES[$library]} -eq 1 ]]; then
-      ENABLED_LIBRARY=$(get_library_name ${library} | sed 's/-/_/g')
-      LICENSE_FILE="${LICENSE_BASEDIR}/license_${ENABLED_LIBRARY}.txt"
-
-      RC=$(copy_external_library_license_file ${library} "${LICENSE_FILE}")
-
-      if [[ ${RC} -ne 0 ]]; then
-        echo -e "DEBUG: Failed to copy the license file of ${ENABLED_LIBRARY}\n" 1>>"${BASEDIR}"/build.log 2>&1
-        echo -e "failed\n\nSee build.log for details\n"
-        exit 1
-      fi
-
-      echo -e "DEBUG: Copied the license file of ${ENABLED_LIBRARY} successfully\n" 1>>"${BASEDIR}"/build.log 2>&1
-    fi
-  done
-
-  # COPY LIBRARY LICENSES
-  if [[ ${GPL_ENABLED} == "yes" ]]; then
-    cp "${BASEDIR}"/LICENSE.GPLv3 "${LICENSE_BASEDIR}"/license.txt 1>>"${BASEDIR}"/build.log 2>&1
-  else
-    cp "${BASEDIR}"/LICENSE.LGPLv3 "${LICENSE_BASEDIR}"/license.txt 1>>"${BASEDIR}"/build.log 2>&1
-  fi
-
-  echo -e "DEBUG: Copied the ffmpeg-kit license successfully\n" 1>>"${BASEDIR}"/build.log 2>&1
-
-  # BUILD NATIVE LIBRARY
-  if [[ ${SKIP_ffmpeg_kit} -ne 1 ]]; then
-    "${ANDROID_NDK_ROOT}"/ndk-build -B 1>>"${BASEDIR}"/build.log 2>&1
-
-    if [ $? -eq 0 ]; then
-      echo "ok"
-    else
-      echo "failed"
-      exit 1
-    fi
-  else
-    echo "skipped"
-  fi
-
-  echo -e -n "\n"
-
-  # DO NOT BUILD ANDROID ARCHIVE
-  if [[ ${NO_ARCHIVE} -ne 1 ]]; then
-
-    echo -e -n "\nCreating Android archive under prebuilt: "
-
-    # BUILD ANDROID ARCHIVE
-    rm -f "${BASEDIR}"/android/ffmpeg-kit-android-lib/build/outputs/aar/ffmpeg-kit-release.aar 1>>"${BASEDIR}"/build.log 2>&1
-    ./gradlew ffmpeg-kit-android-lib:clean ffmpeg-kit-android-lib:assembleRelease ffmpeg-kit-android-lib:testReleaseUnitTest 1>>"${BASEDIR}"/build.log 2>&1
-    if [ $? -ne 0 ]; then
-      echo -e "failed\n"
-      exit 1
-    fi
-
-    # COPY ANDROID ARCHIVE TO PREBUILT DIRECTORY
-    FFMPEG_KIT_AAR="${BASEDIR}/prebuilt/$(get_aar_directory)/ffmpeg-kit"
-    rm -rf "${FFMPEG_KIT_AAR}" 1>>"${BASEDIR}"/build.log 2>&1
-    mkdir -p "${FFMPEG_KIT_AAR}" 1>>"${BASEDIR}"/build.log 2>&1
-    cp "${BASEDIR}"/android/ffmpeg-kit-android-lib/build/outputs/aar/ffmpeg-kit-release.aar "${FFMPEG_KIT_AAR}"/ffmpeg-kit.aar 1>>"${BASEDIR}"/build.log 2>&1
-    if [ $? -ne 0 ]; then
-      echo -e "failed\n"
-      exit 1
-    fi
-
-    echo -e "INFO: Created ffmpeg-kit Android archive successfully.\n" 1>>"${BASEDIR}"/build.log 2>&1
-    echo -e "ok\n"
-  else
-    echo -e "INFO: Skipped creating Android archive.\n" 1>>"${BASEDIR}"/build.log 2>&1
-  fi
-fi
+#if [[ -n ${ANDROID_ARCHITECTURES} ]]; then
+#
+#  echo -n -e "\nffmpeg-kit: "
+#
+#  # CREATE Application.mk FILE BEFORE STARTING THE NATIVE BUILD
+#  build_application_mk
+#
+#  # CLEAR OLD NATIVE LIBRARIES
+#  rm -rf "${BASEDIR}"/android/libs 1>>"${BASEDIR}"/build.log 2>&1
+#  rm -rf "${BASEDIR}"/android/obj 1>>"${BASEDIR}"/build.log 2>&1
+#
+#  cd "${BASEDIR}"/android 1>>"${BASEDIR}"/build.log 2>&1 || exit 1
+#
+#  # COPY LICENSES
+#  LICENSE_BASEDIR="${BASEDIR}"/android/ffmpeg-kit-android-lib/src/main/res/raw
+#  rm -f "${LICENSE_BASEDIR}"/*.txt 1>>"${BASEDIR}"/build.log 2>&1 || exit 1
+#  for library in {0..46}; do
+#    if [[ ${ENABLED_LIBRARIES[$library]} -eq 1 ]]; then
+#      ENABLED_LIBRARY=$(get_library_name ${library} | sed 's/-/_/g')
+#      LICENSE_FILE="${LICENSE_BASEDIR}/license_${ENABLED_LIBRARY}.txt"
+#
+#      RC=$(copy_external_library_license_file ${library} "${LICENSE_FILE}")
+#
+#      if [[ ${RC} -ne 0 ]]; then
+#        echo -e "DEBUG: Failed to copy the license file of ${ENABLED_LIBRARY}\n" 1>>"${BASEDIR}"/build.log 2>&1
+#        echo -e "failed\n\nSee build.log for details\n"
+#        exit 1
+#      fi
+#
+#      echo -e "DEBUG: Copied the license file of ${ENABLED_LIBRARY} successfully\n" 1>>"${BASEDIR}"/build.log 2>&1
+#    fi
+#  done
+#
+#  # COPY LIBRARY LICENSES
+#  if [[ ${GPL_ENABLED} == "yes" ]]; then
+#    cp "${BASEDIR}"/LICENSE.GPLv3 "${LICENSE_BASEDIR}"/license.txt 1>>"${BASEDIR}"/build.log 2>&1
+#  else
+#    cp "${BASEDIR}"/LICENSE.LGPLv3 "${LICENSE_BASEDIR}"/license.txt 1>>"${BASEDIR}"/build.log 2>&1
+#  fi
+#
+#  echo -e "DEBUG: Copied the ffmpeg-kit license successfully\n" 1>>"${BASEDIR}"/build.log 2>&1
+#
+#  # BUILD NATIVE LIBRARY
+#  if [[ ${SKIP_ffmpeg_kit} -ne 1 ]]; then
+#    "${ANDROID_NDK_ROOT}"/ndk-build -B 1>>"${BASEDIR}"/build.log 2>&1
+#
+#    if [ $? -eq 0 ]; then
+#      echo "ok"
+#    else
+#      echo "failed"
+#      exit 1
+#    fi
+#  else
+#    echo "skipped"
+#  fi
+#
+#  echo -e -n "\n"
+#
+#  # DO NOT BUILD ANDROID ARCHIVE
+#  if [[ ${NO_ARCHIVE} -ne 1 ]]; then
+#
+#    echo -e -n "\nCreating Android archive under prebuilt: "
+#
+#    # BUILD ANDROID ARCHIVE
+#    rm -f "${BASEDIR}"/android/ffmpeg-kit-android-lib/build/outputs/aar/ffmpeg-kit-release.aar 1>>"${BASEDIR}"/build.log 2>&1
+#    ./gradlew ffmpeg-kit-android-lib:clean ffmpeg-kit-android-lib:assembleRelease ffmpeg-kit-android-lib:testReleaseUnitTest 1>>"${BASEDIR}"/build.log 2>&1
+#    if [ $? -ne 0 ]; then
+#      echo -e "failed\n"
+#      exit 1
+#    fi
+#
+#    # COPY ANDROID ARCHIVE TO PREBUILT DIRECTORY
+#    FFMPEG_KIT_AAR="${BASEDIR}/prebuilt/$(get_aar_directory)/ffmpeg-kit"
+#    rm -rf "${FFMPEG_KIT_AAR}" 1>>"${BASEDIR}"/build.log 2>&1
+#    mkdir -p "${FFMPEG_KIT_AAR}" 1>>"${BASEDIR}"/build.log 2>&1
+#    cp "${BASEDIR}"/android/ffmpeg-kit-android-lib/build/outputs/aar/ffmpeg-kit-release.aar "${FFMPEG_KIT_AAR}"/ffmpeg-kit.aar 1>>"${BASEDIR}"/build.log 2>&1
+#    if [ $? -ne 0 ]; then
+#      echo -e "failed\n"
+#      exit 1
+#    fi
+#
+#    echo -e "INFO: Created ffmpeg-kit Android archive successfully.\n" 1>>"${BASEDIR}"/build.log 2>&1
+#    echo -e "ok\n"
+#  else
+#    echo -e "INFO: Skipped creating Android archive.\n" 1>>"${BASEDIR}"/build.log 2>&1
+#  fi
+#fi
