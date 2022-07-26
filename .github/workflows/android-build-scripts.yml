@@ -5,6 +5,7 @@ on:
     branches:
       - development
       - main
+      - ndk
     paths:
       - '.github/workflows/android-build-scripts.yml'
       - 'android/**'
@@ -23,11 +24,12 @@ on:
 
 jobs:
   build-main-on-linux:
+    if: false
     name: android main on linux
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        ndk-version: [ 'r22b-linux-x86_64', 'r23b-linux' ]
+        ndk-version: [ 'r23c-linux' ]
     defaults:
       run:
         shell: bash
@@ -44,19 +46,24 @@ jobs:
           unzip -q -o ndk.zip -d .ndk
           echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
       - name: run the build script
-        run: ./android.sh -d --enable-android-media-codec --enable-android-zlib
+        run: SKIP_ffmpeg_kit=1 ./android.sh --no-archive --enable-android-media-codec --enable-android-zlib --enable-chromaprint --enable-gmp --enable-gnutls --enable-libass --enable-libiconv --enable-libvorbis --enable-libvpx --enable-opencore-amr --enable-openh264 --enable-opus --enable-snappy --enable-soxr
       - name: print build logs
         if: ${{ always() }}
         run: cat build.log
       - name: print ffbuild logs
         if: ${{ failure() }}
         run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-on-linux-lts
+          path: ${{runner.workspace}}/ffmpeg-kit/prebuilt/
+
   build-lts-on-linux:
     name: android lts on linux
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        ndk-version: [ 'r22b-linux-x86_64', 'r23b-linux' ]
+        ndk-version: [ 'r23c-linux' ]
     defaults:
       run:
         shell: bash
@@ -72,15 +79,24 @@ jobs:
           curl -s "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk-version }}.zip" -o ndk.zip
           unzip -q -o ndk.zip -d .ndk
           echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
+      - name: Install Dependencies
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install --fix-missing -y meson build-essential binutils make cmake gcc g++ clang nasm yasm ninja-build autogen gperf autopoint ragel
       - name: run the build script
-        run: ./android.sh -d --lts --enable-android-media-codec --enable-android-zlib
+        run: SKIP_ffmpeg_kit=1 ./android.sh --no-ffmpeg-kit-protocols --lts --no-archive --enable-android-media-codec --enable-android-zlib --enable-chromaprint --enable-gmp --enable-gnutls --enable-libass --enable-libiconv --enable-libvorbis --enable-libvpx --enable-opencore-amr --enable-openh264 --enable-opus --enable-snappy --enable-soxr
       - name: print build logs
         if: ${{ always() }}
         run: cat build.log
       - name: print ffbuild logs
         if: ${{ failure() }}
         run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-on-linux-lts
+          path: ${{runner.workspace}}/ffmpeg-kit/prebuilt/
+
   build-main-on-macos:
+    if: false
     name: android main on macos
     runs-on: macos-10.15
     strategy:
@@ -110,6 +126,7 @@ jobs:
         if: ${{ failure() }}
         run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
   build-lts-on-macos:
+    if: false
     name: android lts on macos
     runs-on: macos-10.15
     strategy:
@@ -139,6 +156,7 @@ jobs:
         if: ${{ failure() }}
         run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
   build-main-without-ffmpeg-kit-protocols-on-linux:
+    if: false
     name: build without ffmpeg-kit protocols
     runs-on: ubuntu-20.04
     strategy:
