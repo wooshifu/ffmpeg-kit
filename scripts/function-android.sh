@@ -62,7 +62,7 @@ enable_lts_build() {
   export FFMPEG_KIT_LTS_BUILD="1"
 
   # LTS RELEASES USE API LEVEL 16 / Android 4.1 (JELLY BEAN)
-  export API=16
+  export API=21
 }
 
 build_application_mk() {
