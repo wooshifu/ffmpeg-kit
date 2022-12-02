@@ -1,0 +1,97 @@
+name: my android build scripts
+
+on:
+  push:
+    branches:
+      - development
+      - main
+    paths:
+      - '.github/workflows/android-build-scripts.yml'
+      - 'android/**'
+      - '!android/README.md'
+      - 'scripts/**'
+      - 'tools/**'
+      - 'android.sh'
+  pull_request:
+    branches:
+      - development
+      - main
+    paths:
+      - '.github/workflows/android-build-scripts.yml'
+      - 'android/**'
+      - '!android/README.md'
+      - 'scripts/**'
+      - 'tools/**'
+      - 'android.sh'
+
+jobs:
+  build-own-lts-full-on-linux:
+    name: android own lts full on linux
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        ndk-version: [ 'r25b-linux' ]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up adopt jdk 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      - name: set up android ndk
+        run: |
+          curl -s "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk-version }}.zip" -o ndk.zip
+          unzip -q -o ndk.zip -d .ndk
+          echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
+      - name: run the build script
+        run: |
+          sudo apt update
+          sudo apt install autogen nasm yasm build-essential -y
+          ./android.sh -s --lts --enable-gpl --enable-android-media-codec --enable-android-zlib --enable-lame --enable-libvorbis --enable-libvpx --enable-libwebp --enable-opencore-amr --enable-openh264 --enable-opus --enable-soxr --enable-speex --enable-twolame --no-ffmpeg-kit-protocols --no-archive
+      - name: print build logs
+        if: ${{ always() }}
+        run: cat build.log
+      - name: print ffbuild logs
+        if: ${{ failure() }}
+        run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-on-linux-lts-${{ matrix.ndk-version }}
+          path: ./prebuilt/
+
+  build-own-lts-on-linux:
+    name: android own lts on linux
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        ndk-version: [ 'r25b-linux' ]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up adopt jdk 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      - name: set up android ndk
+        run: |
+          curl -s "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk-version }}.zip" -o ndk.zip
+          unzip -q -o ndk.zip -d .ndk
+          echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
+      - name: run the build script
+        run: ./android.sh -s --lts --enable-gpl --enable-android-media-codec --enable-android-zlib --no-ffmpeg-kit-protocols --no-archive
+      - name: print build logs
+        if: ${{ always() }}
+        run: cat build.log
+      - name: print ffbuild logs
+        if: ${{ failure() }}
+        run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-on-linux-lts-${{ matrix.ndk-version }}
+          path: ./prebuilt/
